@@ -160,3 +160,57 @@ export const sandboxInstances = mysqlTable("sandbox_instances", {
 
 export type SandboxInstance = typeof sandboxInstances.$inferSelect;
 export type InsertSandboxInstance = typeof sandboxInstances.$inferInsert;
+
+/**
+ * Memory entries - stores long-term memory, preferences, and context
+ */
+export const memoryEntries = mysqlTable("memory_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sessionId: int("sessionId"),
+  type: mysqlEnum("type", ["fact", "preference", "skill", "context", "summary"]).notNull(),
+  key: varchar("key", { length: 255 }).notNull(),
+  value: text("value").notNull(),
+  metadata: json("metadata"),
+  importance: int("importance").notNull().default(5), // 1-10
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  lastAccessedAt: timestamp("lastAccessedAt").defaultNow().notNull(),
+  accessCount: int("accessCount").notNull().default(0),
+});
+
+export type MemoryEntry = typeof memoryEntries.$inferSelect;
+export type InsertMemoryEntry = typeof memoryEntries.$inferInsert;
+
+/**
+ * Conversation summaries - stores session summaries for context
+ */
+export const conversationSummaries = mysqlTable("conversation_summaries", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull().unique(),
+  summary: text("summary").notNull(),
+  keyPoints: json("keyPoints").notNull(),
+  topics: json("topics").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ConversationSummary = typeof conversationSummaries.$inferSelect;
+export type InsertConversationSummary = typeof conversationSummaries.$inferInsert;
+
+/**
+ * Scheduled tasks - stores scheduled agent tasks
+ */
+export const scheduledTasks = mysqlTable("scheduled_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  prompt: text("prompt").notNull(),
+  schedule: varchar("schedule", { length: 255 }).notNull(), // cron expression or interval
+  type: mysqlEnum("type", ["cron", "interval"]).notNull(),
+  enabled: int("enabled").notNull().default(1),
+  lastRun: timestamp("lastRun"),
+  nextRun: timestamp("nextRun"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ScheduledTask = typeof scheduledTasks.$inferSelect;
+export type InsertScheduledTask = typeof scheduledTasks.$inferInsert;
