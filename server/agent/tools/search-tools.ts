@@ -1,4 +1,5 @@
 import { Tool, ToolResult } from "./registry";
+import { ENV } from "../../_core/env";
 
 export const webSearchTool: Tool = {
   name: "web_search",
@@ -22,13 +23,38 @@ export const webSearchTool: Tool = {
     try {
       const { query, num_results = 10 } = params;
 
-      // Implementation would use search API
+      // Use Manus built-in search API
+      const response = await fetch(`${ENV.forgeApiUrl}/omni_search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ENV.forgeApiKey}`,
+        },
+        body: JSON.stringify({
+          queries: [query],
+          search_type: 'info',
+          max_results: num_results,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Search API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const results = data.results || [];
+
+      const formattedResults = results.map((r: any, i: number) => 
+        `${i + 1}. ${r.title}\n   ${r.snippet}\n   URL: ${r.url}`
+      ).join('\n\n');
+
       return {
         success: true,
-        result: `Search results for: ${query}`,
+        result: formattedResults || 'No results found',
         metadata: {
           query,
-          num_results,
+          num_results: results.length,
+          raw_results: results,
         },
       };
     } catch (error: any) {
