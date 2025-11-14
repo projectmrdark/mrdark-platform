@@ -36,6 +36,9 @@ export default function Home() {
               <Button size="lg" variant="outline" asChild>
                 <a href="/sessions">View Sessions</a>
               </Button>
+              <Button size="lg" variant="outline" asChild>
+                <a href="/advanced">Advanced Features</a>
+              </Button>
             </>
           ) : (
             <Button size="lg" asChild>

@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Advanced from "./pages/Advanced";
 import Chat from "./pages/Chat";
 import Sessions from "./pages/Sessions";
 import Settings from "./pages/Settings";
@@ -13,10 +14,10 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-      <Route path={"/chat"} component={Chat} />
-      <Route path={"/chat/:sessionId"} component={Chat} />
-      <Route path={"/sessions"} component={Sessions} />
-      <Route path={"/settings"} component={Settings} />
+      <Route path="/chat/:sessionId" component={Chat} />
+      <Route path="/sessions" component={Sessions} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/advanced" component={Advanced} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
