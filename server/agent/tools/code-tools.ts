@@ -1,4 +1,10 @@
 import { Tool, ToolResult } from "./registry";
+import { exec } from "child_process";
+import { promisify } from "util";
+import * as fs from "fs/promises";
+import * as path from "path";
+
+const execAsync = promisify(exec);
 
 export const executePythonTool: Tool = {
   name: "execute_python",
@@ -21,29 +27,34 @@ export const executePythonTool: Tool = {
   execute: async (params, context): Promise<ToolResult> => {
     try {
       const { code, timeout = 30 } = params;
-      const { mode } = context;
+      const { sessionId } = context;
 
-      if (mode === "sandbox") {
-        // Execute in sandbox container
-        return {
-          success: true,
-          result: "Python code executed successfully (sandbox mode)",
-          metadata: {
-            execution_time: 0.5,
-            exit_code: 0,
-          },
-        };
-      } else {
-        // Execute locally
-        return {
-          success: true,
-          result: "Python code executed successfully (local mode)",
-          metadata: {
-            execution_time: 0.3,
-            exit_code: 0,
-          },
-        };
-      }
+      // Create temp file
+      const tempFile = `/tmp/python_${sessionId}_${Date.now()}.py`;
+      await fs.writeFile(tempFile, code, 'utf-8');
+
+      const startTime = Date.now();
+      
+      // Execute Python code
+      const { stdout, stderr } = await execAsync(
+        `python3 ${tempFile}`,
+        { timeout: timeout * 1000 }
+      );
+
+      const executionTime = (Date.now() - startTime) / 1000;
+
+      // Clean up
+      await fs.unlink(tempFile).catch(() => {});
+
+      return {
+        success: true,
+        result: stdout || stderr || "Code executed successfully (no output)",
+        metadata: {
+          execution_time: executionTime,
+          exit_code: 0,
+          stderr: stderr || undefined,
+        },
+      };
     } catch (error: any) {
       return {
         success: false,
@@ -74,13 +85,32 @@ export const executeJavaScriptTool: Tool = {
   execute: async (params, context): Promise<ToolResult> => {
     try {
       const { code, timeout = 30 } = params;
+      const { sessionId } = context;
+
+      // Create temp file
+      const tempFile = `/tmp/javascript_${sessionId}_${Date.now()}.js`;
+      await fs.writeFile(tempFile, code, 'utf-8');
+
+      const startTime = Date.now();
+      
+      // Execute JavaScript code
+      const { stdout, stderr } = await execAsync(
+        `node ${tempFile}`,
+        { timeout: timeout * 1000 }
+      );
+
+      const executionTime = (Date.now() - startTime) / 1000;
+
+      // Clean up
+      await fs.unlink(tempFile).catch(() => {});
 
       return {
         success: true,
-        result: "JavaScript code executed successfully",
+        result: stdout || stderr || "Code executed successfully (no output)",
         metadata: {
-          execution_time: 0.2,
+          execution_time: executionTime,
           exit_code: 0,
+          stderr: stderr || undefined,
         },
       };
     } catch (error: any) {
@@ -113,23 +143,26 @@ export const executeShellTool: Tool = {
   execute: async (params, context): Promise<ToolResult> => {
     try {
       const { command, timeout = 30 } = params;
-      const { mode } = context;
 
-      if (mode === "sandbox") {
-        return {
-          success: true,
-          result: "Shell command executed successfully (sandbox mode)",
-          metadata: {
-            execution_time: 0.4,
-            exit_code: 0,
-          },
-        };
-      } else {
-        return {
-          success: false,
-          error: "Shell execution is only available in sandbox mode for security reasons",
-        };
-      }
+      const startTime = Date.now();
+      
+      // Execute shell command
+      const { stdout, stderr } = await execAsync(
+        command,
+        { timeout: timeout * 1000 }
+      );
+
+      const executionTime = (Date.now() - startTime) / 1000;
+
+      return {
+        success: true,
+        result: stdout || stderr || "Command executed successfully (no output)",
+        metadata: {
+          execution_time: executionTime,
+          exit_code: 0,
+          stderr: stderr || undefined,
+        },
+      };
     } catch (error: any) {
       return {
         success: false,
