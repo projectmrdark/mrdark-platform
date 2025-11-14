@@ -5,7 +5,9 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Admin from "./pages/Admin";
 import Advanced from "./pages/Advanced";
+import ApiDocs from "./pages/ApiDocs";
 import Chat from "./pages/Chat";
 import Sessions from "./pages/Sessions";
 import Settings from "./pages/Settings";
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/sessions" component={Sessions} />
       <Route path="/settings" component={Settings} />
       <Route path="/advanced" component={Advanced} />
+      <Route path="/admin" component={Admin} />
+      <Route path="/api-docs" component={ApiDocs} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
