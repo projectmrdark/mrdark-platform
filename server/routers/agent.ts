@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { agentOrchestrator } from "../agent/orchestrator";
+import { AgentOrchestrator } from "../agent/orchestrator";
+
+const agentOrchestrator = new AgentOrchestrator();
 import {
   createSession,
   getUserSessions,
@@ -130,7 +132,13 @@ export const agentRouter = router({
       name: tool.name,
       description: tool.description,
       category: tool.category,
-      parameters: tool.parameters,
+      parameters: tool.parameters.map(p => ({
+        name: p.name,
+        type: p.type,
+        description: p.description,
+        required: p.required,
+        enum: p.enum,
+      })),
     }));
   }),
 
@@ -145,7 +153,13 @@ export const agentRouter = router({
         name: tool.name,
         description: tool.description,
         category: tool.category,
-        parameters: tool.parameters,
+        parameters: tool.parameters.map(p => ({
+          name: p.name,
+          type: p.type,
+          description: p.description,
+          required: p.required,
+          enum: p.enum,
+        })),
       }));
     }),
 });

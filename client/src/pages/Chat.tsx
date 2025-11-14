@@ -9,6 +9,9 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { Streamdown } from "streamdown";
 import { getLoginUrl } from "@/const";
+import { ToolExecutionPanel } from "@/components/ToolExecutionPanel";
+import { FileExplorer } from "@/components/FileExplorer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Chat() {
   const { user, loading: authLoading } = useAuth();
@@ -117,8 +120,10 @@ export default function Chat() {
         </div>
       </header>
 
-      {/* Chat Area */}
-      <div className="flex-1 container mx-auto flex flex-col max-w-4xl py-4">
+      {/* Main Content */}
+      <div className="flex-1 container mx-auto flex gap-4 py-4">
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col max-w-3xl">
         <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -208,6 +213,25 @@ export default function Chat() {
             )}
           </Button>
         </div>
+        </div>
+
+        {/* Right Sidebar - Execution Viewer */}
+        {sessionId && (
+          <div className="w-96 flex-shrink-0">
+            <Tabs defaultValue="tools" className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="tools">Tools</TabsTrigger>
+                <TabsTrigger value="files">Files</TabsTrigger>
+              </TabsList>
+              <TabsContent value="tools" className="flex-1 mt-4">
+                <ToolExecutionPanel executions={[]} />
+              </TabsContent>
+              <TabsContent value="files" className="flex-1 mt-4">
+                <FileExplorer files={[]} />
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );
